@@ -9,7 +9,7 @@ st.title("Analyse de Graphes depuis Neo4j")
 st.write("Explorez différents algorithmes appliqués sur les graphes.")
 
 # Configuration de la connexion à Neo4j
-NEO4J_URI = "bolt://neo4j:7687"
+NEO4J_URI = "bolt://localhost:7687"
 NEO4J_USER = "neo4j"  # Remplacez par votre nom d'utilisateur
 NEO4J_PASSWORD = "password"  # Remplacez par votre mot de passe
 driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
