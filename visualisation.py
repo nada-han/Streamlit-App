@@ -5,7 +5,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 # Configurer le titre de l'application Streamlit
-st.title("Analyse de Graphes depuis Neo4j")
+st.title("Analyse de Graphes depuis Neo4j : ")
 st.write("Explorez différents algorithmes appliqués sur les graphes.")
 
 # Configuration de la connexion à Neo4j
@@ -20,17 +20,14 @@ def query_neo4j(query):
         result = session.run(query)
         return [dict(record) for record in result]
 
-# Requête pour récupérer les données d'un graphe spécifique
 # Fonction pour visualiser le graphe
 def visualize_graph(df, algorithm_name=None):
-    # Ensure that the necessary columns exist in the DataFrame
     if 'source' not in df.columns:
         st.error("Le graphe ne contient pas de données valides pour la visualisation.")
         return
 
     G = nx.DiGraph()
     for _, row in df.iterrows():
-        # Add node with existing attributes
         node_attrs = {}
         if 'pagerank' in row:
             node_attrs['pagerank'] = row['pagerank']
@@ -40,19 +37,15 @@ def visualize_graph(df, algorithm_name=None):
             node_attrs['triangle_count'] = row['triangle_count']
 
         G.add_node(row['source'], **node_attrs)
-        
-        # Add edges if target node exists
         if pd.notna(row.get('target', None)):
             G.add_edge(row['source'], row['target'])
 
-    # Generate layout and labels
     pos = nx.spring_layout(G)
     labels = {
         node: f"{node}\nPR: {data.get('pagerank', 'N/A'):.2f}" if data.get('pagerank') is not None else f"{node}\nPR: N/A"
         for node, data in G.nodes(data=True)
     }
 
-    # Visualize graph
     plt.figure(figsize=(12, 8))
     nx.draw(
         G, pos, with_labels=True, node_size=700, node_color='lightblue',
@@ -62,7 +55,7 @@ def visualize_graph(df, algorithm_name=None):
     plt.title(title)
     st.pyplot(plt)
 
-# Querying the graph data (example with PageRank, replace for other algorithms)
+# Fonction pour récupérer et nettoyer les données selon l'algorithme sélectionné
 def query_graph_data(graph_name, algorithm):
     query = f"""
     MATCH (n:Vertex {{graph_name: '{graph_name}'}})
@@ -75,16 +68,8 @@ def query_graph_data(graph_name, algorithm):
         m.id AS target
     """
     result_df = pd.DataFrame(query_neo4j(query))
-    
-    # Ensure the expected algorithm column exists
-    if algorithm == "PageRank" and 'pagerank' not in result_df.columns:
-        st.warning("Aucune donnée PageRank trouvée pour ce graphe.")
-    elif algorithm == "Connected Components" and 'component' not in result_df.columns:
-        st.warning("Aucune donnée pour les composants connectés trouvée pour ce graphe.")
-    elif algorithm == "Triangle Count" and 'triangle_count' not in result_df.columns:
-        st.warning("Aucune donnée pour le nombre de triangles trouvée pour ce graphe.")
-    
-    # Filter the dataframe based on the selected algorithm
+
+    # Filtrer les données en fonction de l'algorithme sélectionné
     if algorithm == "PageRank":
         result_df = result_df[['source', 'pagerank']].dropna(subset=['pagerank'])
     elif algorithm == "Connected Components":
@@ -92,8 +77,11 @@ def query_graph_data(graph_name, algorithm):
     elif algorithm == "Triangle Count":
         result_df = result_df[['source', 'triangle_count']].dropna(subset=['triangle_count'])
 
-    return result_df
+    # Supprimer les lignes où 'target' est None (pour visualisation)
+    if 'target' in result_df.columns:
+        result_df = result_df.dropna(subset=['target'])
 
+    return result_df
 
 # Interface Streamlit pour sélectionner un algorithme
 st.subheader("Sélectionner un algorithme")
