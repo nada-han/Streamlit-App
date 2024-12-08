@@ -48,8 +48,10 @@ def visualize_graph(df, algorithm_name=None):
     # Generate layout and labels
     pos = nx.spring_layout(G)
     labels = {
-        node: f"{node}\nPR: {data.get('pagerank', 'N/A'):.2f}" if data.get('pagerank') is not None else f"{node}\nPR: N/A"
-        for node, data in G.nodes(data=True)
+    node: f"{node}\nPR: {float(data.get('pagerank')):.2f}" 
+    if data.get('pagerank') is not None and isinstance(data.get('pagerank'), (int, float)) 
+    else f"{node}\nPR: N/A"
+    for node, data in G.nodes(data=True)
     }
 
     # Visualize graph
