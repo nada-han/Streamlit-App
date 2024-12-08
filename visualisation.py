@@ -86,11 +86,11 @@ def query_graph_data(graph_name, algorithm):
     
     # Filter the dataframe based on the selected algorithm
     if algorithm == "PageRank":
-        result_df = result_df[['source', 'pagerank']]
+        result_df = result_df[['source', 'pagerank']].dropna(subset=['pagerank'])
     elif algorithm == "Connected Components":
-        result_df = result_df[['source', 'component']]
+        result_df = result_df[['source', 'component']].dropna(subset=['component'])
     elif algorithm == "Triangle Count":
-        result_df = result_df[['source', 'triangle_count']]
+        result_df = result_df[['source', 'triangle_count']].dropna(subset=['triangle_count'])
 
     return result_df
 
